@@ -71,6 +71,12 @@ const flappyBird = {
     altura: 24,
     x: 10,
     y: 50,
+    gravidade: 0.25,
+    velocidade: 0,
+    atualiza(){
+        flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade
+        flappyBird.y = flappyBird.y + flappyBird.velocidade;
+    },
     desenha() {
         contexto.drawImage( //ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
             sprites, //imagem que será utilizada
@@ -80,19 +86,71 @@ const flappyBird = {
             flappyBird.largura, flappyBird.altura    //Tamanho do sprite na tela.
         );
     }
-}
-;
+};
+
+const mensagemGetReady = {
+    spriteX: 134,
+    spriteY: 0,
+    largura: 174,
+    altura: 152,
+    x: (canvas.width / 2) - 174 / 2,
+    y: 50,
+    desenha() {
+        contexto.drawImage(
+            sprites,
+            mensagemGetReady.spriteX, mensagemGetReady.spriteY,
+            mensagemGetReady.largura, mensagemGetReady.altura,
+            mensagemGetReady.x, mensagemGetReady.y,
+            mensagemGetReady.largura, mensagemGetReady.altura
+        );
+    }
+};
+
+//Telas
+let telaAtiva = {};
+function mudaParaTela(novaTela){
+    telaAtiva = novaTela;
+};
+
+const telas = {
+    INICIO: {
+        desenha(){
+            planoDeFundo.desenha();
+            chao.desenha();
+            flappyBird.desenha();
+            mensagemGetReady.desenha();
+        },
+        click(){
+            mudaParaTela(telas.JOGO);
+        },
+        atualiza(){
+
+        },
+    },
+    JOGO : {
+        desenha(){
+            planoDeFundo.desenha();
+            chao.desenha();
+            flappyBird.desenha();
+        },
+        atualiza(){
+            flappyBird.atualiza();
+        },
+    },
+};
 
 function loop(){
-    planoDeFundo.desenha();
-    chao.desenha()/
-    flappyBird.desenha();
-
-    //flappyBird.x = flappyBird.x + 1;
-    //flappyBird.y = flappyBird.y + 1;
+    telaAtiva.desenha();
+    telaAtiva.atualiza();
     
     requestAnimationFrame(loop);
-}
+};
 
-loop()
+window.addEventListener('click', function(){
+    if(telaAtiva.click){
+        telaAtiva.click();
+    }
+});
 
+mudaParaTela(telas.INICIO);
+loop();
