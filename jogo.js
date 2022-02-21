@@ -6,6 +6,9 @@ som_HIT.src = './efeitos/efeitos_hit.wav';
 const som_PULO = new Audio();
 som_PULO.src = './efeitos/efeitos_pulo.wav';
 
+const som_PONTO = new Audio();
+som_PONTO.src = './efeitos/efeitos_ponto.wav';
+
 const sprites = new Image();
 sprites.src = './sprites.png';
 
@@ -127,7 +130,7 @@ function criaFlappyBird() {
             if (fazColisao(flappyBird, globais.chao)) {
                 //console.log("Fez colisão");
                 som_HIT.play();
-
+                
                 mudaParaTela(telas.GAME_OVER)
 
                 return;
@@ -260,7 +263,7 @@ function criaCanos() {
 
             if((globais.flappyBird.x + globais.flappyBird.largura) >= par.x){
                 //console.log("Flappy Bird invadiu a área dos canos")
-
+               
                 if(cabecaFlappy <= par.canoCeu.y){
                     //console.log("Bateu cano ceu")
                     som_HIT.play();
@@ -272,6 +275,8 @@ function criaCanos() {
                     som_HIT.play();
                     return true;
                 }
+                som_PONTO.play();
+                som_PONTO.volume = 0.3
             }
 
             return false
@@ -281,6 +286,7 @@ function criaCanos() {
     return canos;
 }
 
+let maiorPontuacao = 0
 function criaPlacar(){
     const placar = {
         pontuacao : 0,
@@ -296,120 +302,184 @@ function criaPlacar(){
             const passouIntervalo = frames % intervaloDeFrames === 0;
 
             if(passouIntervalo){
-                placar.pontuacao = placar.pontuacao + 1
+                placar.pontuacao = placar.pontuacao + 1;
             }
         },
+        bestScore(){
+            if(placar.pontuacao > maiorPontuacao){
+                maiorPontuacao = placar.pontuacao
+            }
+        }
     }
 
     return placar
 }
 
-
-    //Mensagem da Tela Inicial
-    const mensagemGetReady = {
-        spriteX: 134,
-        spriteY: 0,
-        largura: 174,
-        altura: 152,
-        x: (canvas.width / 2) - 174 / 2,
-        y: 50,
-        desenha() {
-            contexto.drawImage(
-                sprites,
-                mensagemGetReady.spriteX, mensagemGetReady.spriteY,
-                mensagemGetReady.largura, mensagemGetReady.altura,
-                mensagemGetReady.x, mensagemGetReady.y,
-                mensagemGetReady.largura, mensagemGetReady.altura
-            );
-        }
-    };
-
-    //Mensagem da Tela de Game Over
-    const mensagemGameOver = {
-        spriteX: 133,
-        spriteY: 153,
-        largura: 233,
-        altura: 202,
-        x: (canvas.width / 2) - 233 / 2,
-        y: 50,
-        desenha(){
-            contexto.drawImage(
-                sprites,
-                mensagemGameOver.spriteX, mensagemGameOver.spriteY,
-                mensagemGameOver.largura, mensagemGameOver.altura,
-                mensagemGameOver.x, mensagemGameOver.y,
-                mensagemGameOver.largura, mensagemGameOver.altura
-            );
-        }
+//Mensagem da Tela Inicial
+const mensagemGetReady = {
+    spriteX: 134,
+    spriteY: 0,
+    largura: 174,
+    altura: 152,
+    x: (canvas.width / 2) - 174 / 2,
+    y: 50,
+    desenha() {
+        contexto.drawImage(
+            sprites,
+            mensagemGetReady.spriteX, mensagemGetReady.spriteY,
+            mensagemGetReady.largura, mensagemGetReady.altura,
+            mensagemGetReady.x, mensagemGetReady.y,
+            mensagemGetReady.largura, mensagemGetReady.altura
+        );
     }
+};
 
+//Mensagem da Tela de Game Over
+const mensagemGameOver = {
+    spriteX: 133,
+    spriteY: 153,
+    largura: 233,
+    altura: 202,
+    x: (canvas.width / 2) - 233 / 2,
+    y: 50,
+    spriteMoedaX : 0,
+    spriteMoedaY : 78,
+    larguraMoeda : 46,
+    alturaMoeda : 46,
+    desenha(){
+        contexto.drawImage(
+            sprites,
+            mensagemGameOver.spriteX, mensagemGameOver.spriteY,
+            mensagemGameOver.largura, mensagemGameOver.altura,
+            mensagemGameOver.x, mensagemGameOver.y,
+            mensagemGameOver.largura, mensagemGameOver.altura
+        )
+    },
+    pontuacao(){
+        contexto.font = `18px 'Press Start 2P'`
+        contexto.textAlign = `right`
+        contexto.fillStyle = 'white'
+        contexto.fillText(`${globais.placar.pontuacao}`, 246, 150)
+    },
+    maiorPontuacao(){
+        contexto.font = `18px 'Press Start 2P'`
+        contexto.textAlign = `right`
+        contexto.fillStyle = 'white'
+        contexto.fillText(`${maiorPontuacao}`, 246, 190)
+    },
+    moeda(){
+        const moeda = { }
+        if(globais.placar.pontuacao < 50){
+            moeda.spriteX = 0,
+            moeda.spriteY = 78,
+            moeda.largura = 45,
+            moeda.altura = 44,
+            moeda.x = mensagemGameOver.x + 29,
+            moeda.y = mensagemGameOver.y + 88
+        }else if(globais.placar.pontuacao < 100){
+            moeda.spriteX = 48,
+            moeda.spriteY = 78,
+            moeda.largura = 45,
+            moeda.altura = 44,
+            moeda.x = mensagemGameOver.x + 29,
+            moeda.y = mensagemGameOver.y + 88
+        }else if(globais.placar.pontuacao <= 150){
+            moeda.spriteX = 0,
+            moeda.spriteY = 124,
+            moeda.largura = 45,
+            moeda.altura = 44,
+            moeda.x = mensagemGameOver.x + 29,
+            moeda.y = mensagemGameOver.y + 88
+        }else if(globais.placar.pontuacao > 150){
+            moeda.spriteX = 48,
+            moeda.spriteY = 124,
+            moeda.largura = 45,
+            moeda.altura = 44,
+            moeda.x = mensagemGameOver.x + 29,
+            moeda.y = mensagemGameOver.y + 88
+        }
+        contexto.drawImage(
+            sprites,
+            moeda.spriteX, moeda.spriteY,
+            moeda.largura, moeda.altura,
+            moeda.x, moeda.y,
+            moeda.largura, moeda.largura
+        )
+    }
+}
 
-    //Telas
-    const globais = {};
-    let telaAtiva = {};
+//Telas
+const globais = {};
+let telaAtiva = {};
 
-    function mudaParaTela(novaTela) {
-        telaAtiva = novaTela;
+function mudaParaTela(novaTela) {
+    telaAtiva = novaTela;
 
-        if (telaAtiva.inicializa) {
-            telaAtiva.inicializa();
-        };
+    if (telaAtiva.inicializa) {
+        telaAtiva.inicializa();
     };
+};
 
-    const telas = {
-        INICIO: {
-            inicializa() {
-                globais.flappyBird = criaFlappyBird();
-                globais.chao = criaChao();
-                globais.canos = criaCanos();
-            },
-            desenha() {
-                planoDeFundo.desenha();
-                globais.chao.desenha();
-                globais.flappyBird.desenha();
-                mensagemGetReady.desenha();
-            },
-            click() {
-                mudaParaTela(telas.JOGO);
-            },
-            atualiza() {
-                globais.chao.atualiza();
-            },
+const telas = {
+    INICIO: {
+        inicializa() {
+            globais.flappyBird = criaFlappyBird();
+            globais.chao = criaChao();
+            globais.canos = criaCanos();
         },
-        JOGO: {
-            inicializa() {
-                globais.placar = criaPlacar();
-            },
-            desenha() {
-                planoDeFundo.desenha();
-                globais.canos.desenha();
-                globais.chao.desenha();
-                globais.flappyBird.desenha();
-                globais.placar.desenha();
-            },
-            click() {
-                globais.flappyBird.pula();
-                som_PULO.play();
-            },
-            atualiza() {
-                globais.flappyBird.atualiza();
-                globais.chao.atualiza();
-                globais.canos.atualiza();
-                globais.placar.atualiza();
-            },
+        desenha() {
+            planoDeFundo.desenha();
+            globais.chao.desenha();
+            globais.flappyBird.desenha();
+            mensagemGetReady.desenha();
         },
-        GAME_OVER : {
-            desenha() {
-                mensagemGameOver.desenha();
-            },
-            click() {
-                mudaParaTela(telas.INICIO);
-            },
-            atualiza() {
-
-            },
+        click() {
+            mudaParaTela(telas.JOGO); 
         },
-    };
+        logkey(e){
+            console.log(e)
+        },
+        atualiza() {
+            globais.chao.atualiza();
+        },
+    },
+    JOGO: {
+        inicializa() {
+            globais.placar = criaPlacar();
+        },
+        desenha() {
+            planoDeFundo.desenha();
+            globais.canos.desenha();
+            globais.chao.desenha();
+            globais.flappyBird.desenha();
+            globais.placar.desenha();
+        },
+        click() {
+            globais.flappyBird.pula();
+            som_PULO.play();
+        },
+        atualiza() {
+            globais.flappyBird.atualiza();
+            globais.chao.atualiza();
+            globais.canos.atualiza();
+            globais.placar.atualiza();
+        },
+    },
+    GAME_OVER : {
+        desenha() {
+            mensagemGameOver.desenha();
+            mensagemGameOver.pontuacao();
+            mensagemGameOver.maiorPontuacao();
+            mensagemGameOver.moeda();
+        },
+        click() {
+            mudaParaTela(telas.INICIO);
+        },
+        atualiza() {
+            globais.placar.bestScore()
+        },
+    },
+};
 
 function loop() {
         telaAtiva.desenha();
@@ -419,11 +489,17 @@ function loop() {
         requestAnimationFrame(loop);
     };
 
-    window.addEventListener('click', function () {
-        if (telaAtiva.click) {
-            telaAtiva.click();
-        }
-    });
+window.addEventListener('click', function () {
+    if (telaAtiva.click) {
+        telaAtiva.click();
+    }
+});
 
-    mudaParaTela(telas.INICIO);
-    loop();
+window.addEventListener('keydown', function(e){
+    if(e.code === "Space" && telaAtiva.click ){
+        telaAtiva.click();
+    }
+});
+
+mudaParaTela(telas.INICIO);
+loop();
